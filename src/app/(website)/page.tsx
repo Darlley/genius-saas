@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   return (
-    <div>
+    <div className=''>
       <Button>
         <Link href="/sign-in">SignIn</Link>
       </Button>
