@@ -26,7 +26,28 @@ import {
   Turtle,
 } from 'lucide-react';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SubmitHandler, useForm } from 'react-hook-form';
+
+import { FormSchema, formSchema } from './contants';
+
 export default function page() {
+  const {
+    control,
+    handleSubmit,
+    watch,
+    reset,
+    setError,
+    formState: { errors, isSubmitting, isLoading },
+  } = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    mode: 'onBlur',
+  });
+
+  const onSubmit: SubmitHandler<FormSchema> = async (data) => {
+    console.log(data);
+  };
+
   return (
     <main className="grid flex-1 gap-4 overflow-auto p-4 md:grid-cols-2 lg:grid-cols-3">
       <div
@@ -36,10 +57,10 @@ export default function page() {
         <form className="grid w-full items-start gap-6">
           <fieldset className="grid gap-6 rounded-lg border p-4">
             <legend className="-ml-1 px-1 text-sm font-medium items-center flex gap-2">
-                <div className="rounded-lg bg-indigo-100 p-1 flex items-center justify-center border border-indigo-500">
-                  <Bot className="size-6 stroke-indigo-500 stroke-1" />
-                </div>
-                <span>Conversas</span>
+              <div className="rounded-lg bg-indigo-100 p-1 flex items-center justify-center border border-indigo-500">
+                <Bot className="size-6 stroke-indigo-500 stroke-1" />
+              </div>
+              <span>Conversas</span>
             </legend>
             <div className="grid gap-3">
               <Label htmlFor="model">Model</Label>
