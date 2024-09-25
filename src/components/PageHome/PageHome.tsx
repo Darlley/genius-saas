@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-import { Card, CardContent, CardHeader } from '../ui/card';
 import {
   Carousel,
   CarouselContent,
@@ -9,26 +7,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '../ui/carousel';
-
-import { ChartConfig } from '@/components/ui/chart';
-
-export const description = 'A simple area chart';
-
-const chartData = [
-  { month: 'January', desktop: 186 },
-  { month: 'February', desktop: 305 },
-  { month: 'March', desktop: 237 },
-  { month: 'April', desktop: 73 },
-  { month: 'May', desktop: 209 },
-  { month: 'June', desktop: 214 },
-];
-
-const chartConfig = {
-  desktop: {
-    label: 'Desktop',
-    color: 'hsl(var(--primary))',
-  },
-} satisfies ChartConfig;
 
 import { PageHomeProps } from './PageHome.types';
 export default function PageHome(props: PageHomeProps) {
@@ -42,46 +20,56 @@ export default function PageHome(props: PageHomeProps) {
         </p>
       </div>
 
-      <Carousel className="md:basis-1/2 lg:basis-1/3">
+      <Carousel>
         <CarouselPrevious className="left-0 z-10" />
         <CarouselContent>
           <CarouselItem className="basis-1/2 sm:basis-1/3 flex items-center justify-center">
-            <Card>
-              <CardHeader>
-                <Image
-                  src="/abstract-high-contrast-white-wavy-shape-5.png"
-                  alt="Forma Ondulada Branca de Alto Contraste 5"
-                  width={2048}
-                  height={2048}
-                  className="w-full h-auto object-cover"
+            <div className="w-[300px] h-[390px] rounded-lg p-1 bg-radial-gradient-circle-230px-at-0-0 bg-white bg-0c0d0d relative">
+              <div className="dot"></div>
+              <div className="w-full h-full rounded-lg border border-white/10 bg-[radial-gradient(circle_280px_at_0%_0%,_#444444,_#0c0d0d)] flex items-center justify-center relative flex-col text-white">
+                <div
+                  className="w-[120px] h-[20px] rounded-full absolute bg-white/20 filter-blur-[10px] top-0 left-0"
+                  style={{
+                    transform: 'rotate(40deg)',
+                    transformOrigin: '10%',
+                    boxShadow: '0 0 50px #fff',
+                    filter: 'blur(10px)',
+                  }}
                 />
-              </CardHeader>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-bold">GPT</h3>
-                <p className="text-sm text-muted-foreground">
-                  Converse com a IA
-                </p>
-              </CardContent>
-            </Card>
+                <div className="text-center flex flex-col gap-1 items-center justify-center">
+                  <h3 className="text-xl font-bold">AI RAG</h3>
+                  <div>Converse com seus dados</div>
+                </div>
+                <div className="line topl" />
+                <div className="line leftl" />
+                <div className="line bottoml" />
+                <div className="line rightl" />
+              </div>
+            </div>
           </CarouselItem>
           <CarouselItem className="basis-1/2 sm:basis-1/3 flex items-center justify-center">
-            <Card>
-              <CardHeader>
-                <Image
-                  src="/translucent-crystal-ancient-greek-sculpture-2.png"
-                  alt="Forma Ondulada Branca de Alto Contraste 5"
-                  width={2048}
-                  height={2048}
-                  className="w-full h-auto object-cover"
+            <div className="w-[300px] h-[390px] rounded-lg p-1 bg-radial-gradient-circle-230px-at-0-0 bg-white bg-0c0d0d relative">
+              <div className="dot"></div>
+              <div className="w-full h-full rounded-lg border border-white/10 bg-[radial-gradient(circle_280px_at_0%_0%,_#444444,_#0c0d0d)] flex items-center justify-center relative flex-col text-white">
+                <div
+                  className="w-[120px] h-[20px] rounded-full absolute bg-white/20 filter-blur-[10px] top-0 left-0"
+                  style={{
+                    transform: 'rotate(40deg)',
+                    transformOrigin: '10%',
+                    boxShadow: '0 0 50px #fff',
+                    filter: 'blur(10px)',
+                  }}
                 />
-              </CardHeader>
-              <CardContent className="p-4">
-                <h3 className="text-lg font-bold">RAG</h3>
-                <p className="text-sm text-muted-foreground">
-                  Converse com seus dados
-                </p>
-              </CardContent>
-            </Card>
+                <div className="text-center flex flex-col gap-1 items-center justify-center">
+                  <h3 className="text-xl font-bold">AI RAG</h3>
+                  <div>Converse com seus dados</div>
+                </div>
+                <div className="line topl" />
+                <div className="line leftl" />
+                <div className="line bottoml" />
+                <div className="line rightl" />
+              </div>
+            </div>
           </CarouselItem>
         </CarouselContent>
         <CarouselNext className="right-0 z-10" />
