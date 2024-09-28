@@ -28,8 +28,13 @@ module.exports = (plop) => {
       },
       {
         type: 'add',
-        path: '../src/components/{{pascalCase name}}/{{pascalCase name}}.types.tsx',
-        templateFile: './templates/component/Props.tsx.hbs',
+        path: '../src/components/{{pascalCase name}}/{{pascalCase name}}.types.ts',
+        templateFile: './templates/component/Props.ts.hbs',
+      },
+      {
+        type: 'add',
+        path: '../src/components/{{pascalCase name}}/{{pascalCase name}}.schema.ts',
+        templateFile: './templates/component/Schemas.ts.hbs',
       },
     ], // array of actions
   });

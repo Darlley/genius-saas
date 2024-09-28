@@ -67,13 +67,13 @@ const routes = [
   {
     label: 'Conversar com IA',
     icon: Bot,
-    href: '/conversar-com-ia',
+    href: '/conversation',
     color: 'stroke-indigo-500',
   },
   {
     label: 'Conversar com RAG',
     icon: Brain,
-    href: '/conversar-com-rag',
+    href: '/rag-conversation',
     color: 'stroke-orange-500',
   },
 ];
