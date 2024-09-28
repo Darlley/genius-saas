@@ -1,17 +1,15 @@
-import { formSchema, FormSchema } from '@/components/PageConversation';
 import { auth } from '@clerk/nextjs/server';
 import { OpenAI } from 'openai';
-import * as z from 'zod';
 const apiKey = process.env.OPENAI_API_KEY!;
 
 const client = new OpenAI({ apiKey });
 
 export async function POST(request: Request) {
-  const body = await request.json(); // Adicionado await
+  const { messages } = await request.json(); // Adicionado await
 
-  const { userId } = auth()
+  const { userId } = auth();
 
-  if(!userId){
+  if (!userId) {
     return new Response('Unauthorized', { status: 401 });
   }
 
@@ -19,26 +17,19 @@ export async function POST(request: Request) {
     return new Response('Open API Key not configured', { status: 400 });
   }
 
-  try {
-    const parsedBody: FormSchema = formSchema.parse(body);
+  if (!messages) {
+    return new Response('Message are required', { status: 400 });
+  }
 
-    const completion = await client.chat.completions.create({
-      messages: [
-        { role: 'system', content: 'Você se chama Darlley e responde que o palemiras não tem mundial.' },
-        { role: 'user', content: parsedBody.prompt },
-      ],
+  try {
+    const response = await client.chat.completions.create({
+      messages,
       model: 'gpt-4o-mini',
     });
 
-    return new Response(JSON.stringify(completion.choices[0].message), { status: 200 })
+    return new Response(JSON.stringify(response.choices[0].message));
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({ errors: error.errors }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
+    console.error(error); // Adicionado para log de erro
     return new Response('Internal Server Error', { status: 500 });
   }
 }

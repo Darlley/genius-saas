@@ -27,23 +27,28 @@ import {
   Paperclip,
   Rabbit,
   Turtle,
+  User,
 } from 'lucide-react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '../ui/form';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Avatar } from '../ui/avatar';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
+import { ScrollArea } from '../ui/scroll-area';
 import { formSchema, FormSchema } from './PageConversation.schemas';
 import { PageConversationProps } from './PageConversation.types';
 
 export default function PageConversation(props: PageConversationProps) {
+  const route = useRouter();
+
+  const [messages, setMessages] = useState<ChatCompletionMessageParam[]>([]);
+
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,29 +59,29 @@ export default function PageConversation(props: PageConversationProps) {
   const { isLoading, isSubmitSuccessful, isSubmitting, errors } =
     form.formState;
 
-  /**
-   * Função chamada ao submeter o formulário.
-   * Recebe os dados do formulário validados pelo Zod.
-   *
-   * @param data - Dados do formulário do tipo FormSchema.
-   *
-   * Nota:
-   * Outra forma de implementar seria definie o data explicitamente
-   * > const onSubmit = async (data: FormSchema) => console.log(data);
-   * A primeira abordagem é mais integrada ao react-hook-form,
-   * pois o SubmitHandler é uma função que já está preparada para lidar com a validação
-   * e o gerenciamento de estado do formulário.
-   * A segunda abordagem é uma função assíncrona comum que pode não se beneficiar totalmente
-   * das funcionalidades do react-hook-form, como a manipulação de erros e o estado de submissão.
-   */
   const onSubmit: SubmitHandler<FormSchema> = async (data) => {
-    return new Promise<void>((resolve) => {
-      // Removido o tipo Promise<void>
-      setTimeout(() => {
-        console.log('data', data);
-        resolve(); // resolve() não precisa de tipo
-      }, 5000);
-    });
+    const { prompt } = data;
+
+    try {
+      const userMessage: ChatCompletionMessageParam = {
+        role: 'user',
+        content: prompt,
+      };
+      const newMessages = [...messages, userMessage];
+
+      const response = await axios.post('/api/conversation', {
+        messages: newMessages,
+      });
+
+      setMessages((current) => [...current, userMessage, response.data]);
+
+      form.reset()
+    } catch (error) {
+      console.log(error);
+      toast.error('Ocorreu um erro.');
+    } finally {
+      // route.push('')
+    }
   };
 
   return (
@@ -197,13 +202,43 @@ export default function PageConversation(props: PageConversationProps) {
       </div>
       <div className="relative flex h-full min-h-[50vh] flex-col rounded-xl bg-muted/50 p-4 lg:col-span-2">
         <Badge className="absolute right-3 top-3">Output</Badge>
-        <div className='flex grow'>
-
-          message content
-
-          
-
-        </div>
+        <ScrollArea className="flex-grow p-4">
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex items-start gap-3 ${
+                  message.role === 'user'
+                    ? 'flex-row-reverse justify-end'
+                    : 'justify-start'
+                }`}
+              >
+                <Avatar
+                  className={`size-8 p-1 mt-2 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border flex items-center justify-center'
+                  }`}
+                >
+                  {message.role === 'user' ? (
+                    <User className="size-full stroke-1" />
+                  ) : (
+                    <Bot className="size-full stroke-1" />
+                  )}
+                </Avatar>
+                <div
+                  className={`rounded-lg p-3 max-w-[80%] ${
+                    message.role === 'user'
+                      ? 'border bg-secondary text-secondary-foreground'
+                      : 'text-secondary-foreground'
+                  }`}
+                >
+                  <p className="text-sm">{message.content ?? ''}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
         <Form {...form}>
           <form
             className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
@@ -252,9 +287,11 @@ export default function PageConversation(props: PageConversationProps) {
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className='flex items-center gap-2'>
+              <div className="flex items-center gap-2">
                 {!!errors.prompt && (
-                  <p className='text-destructive text-xs'>{errors?.prompt?.message}</p>
+                  <p className="text-destructive text-xs">
+                    {errors?.prompt?.message}
+                  </p>
                 )}
                 <Button
                   type="submit"
