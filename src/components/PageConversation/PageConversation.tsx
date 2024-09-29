@@ -34,7 +34,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { ChatCompletionContentPartText, ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from 'openai/resources/index.mjs';
+import { ChatCompletionAssistantMessageParam, ChatCompletionContentPartText, ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from 'openai/resources/index.mjs';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Avatar } from '../ui/avatar';
@@ -48,9 +48,9 @@ import Image from 'next/image';
 export default function PageConversation(props: PageConversationProps) {
   const route = useRouter();
 
-  const [messages, setMessages] = useState<Array<ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam>>([
+  const [messages, setMessages] = useState<Array<ChatCompletionAssistantMessageParam | ChatCompletionUserMessageParam>>([
     {
-      role: 'system',
+      role: 'assistant',
       content: [
         {
           text: 'Olá 🤖 como posso te ajudar?',
@@ -92,7 +92,7 @@ export default function PageConversation(props: PageConversationProps) {
         messages: newMessages,
       });
 
-      setMessages((current) => [...current, response.data as ChatCompletionSystemMessageParam]);
+      setMessages((current) => [...current, response.data as ChatCompletionAssistantMessageParam]);
 
       form.reset();
     } catch (error) {
@@ -284,78 +284,80 @@ export default function PageConversation(props: PageConversationProps) {
             )}
           </div>
         </ScrollArea>
-        <Form {...form}>
-          <form
-            className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
-            x-chunk="dashboard-03-chunk-1"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <FormField
-              control={form.control}
-              name="prompt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="sr-only">Message</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      disabled={isSubmitting}
-                      placeholder="Escreva sua mensagem."
-                      className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <div className="flex items-center justify-between p-3 pt-0">
-              <div className="flex items-center">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Paperclip className="size-4" />
-                        <span className="sr-only">Attach file</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">Attach File</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Mic className="size-4" />
-                        <span className="sr-only">Use Microphone</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">Use Microphone</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="flex items-center gap-2">
-                {!!errors.prompt && (
-                  <p className="text-destructive text-xs">
-                    {errors?.prompt?.message}
-                  </p>
+        <div>
+          <Form {...form}>
+            <form
+              className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
+              x-chunk="dashboard-03-chunk-1"
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
+              <FormField
+                control={form.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="sr-only">Message</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        disabled={isSubmitting}
+                        placeholder="Escreva sua mensagem."
+                        className="min-h-12 resize-none border-0 p-3 shadow-none focus-visible:ring-0"
+                      />
+                    </FormControl>
+                  </FormItem>
                 )}
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant={!!errors.prompt ? 'destructive' : 'default'}
-                  className="ml-auto gap-1.5"
-                  disabled={isSubmitting}
-                >
-                  Send Message
-                  {isSubmitting ? (
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                  ) : (
-                    <CornerDownLeft className="size-3.5" />
+              />
+              <div className="flex items-center justify-between p-3 pt-0">
+                <div className="flex items-center">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Paperclip className="size-4" />
+                          <span className="sr-only">Attach file</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Attach File</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Mic className="size-4" />
+                          <span className="sr-only">Use Microphone</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">Use Microphone</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!!errors.prompt && (
+                    <p className="text-destructive text-xs">
+                      {errors?.prompt?.message}
+                    </p>
                   )}
-                </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant={!!errors.prompt ? 'destructive' : 'default'}
+                    className="ml-auto gap-1.5"
+                    disabled={isSubmitting}
+                  >
+                    Send Message
+                    {isSubmitting ? (
+                      <LoaderCircle className="size-3.5 animate-spin" />
+                    ) : (
+                      <CornerDownLeft className="size-3.5" />
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </div>
       </div>
     </main>
   );
