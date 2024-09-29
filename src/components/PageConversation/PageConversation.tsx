@@ -18,7 +18,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  Badge,
   Bird,
   Bot,
   CornerDownLeft,
@@ -35,19 +34,31 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { ChatCompletionMessageParam } from 'openai/resources/index.mjs';
+import { ChatCompletionContentPartText, ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from 'openai/resources/index.mjs';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Avatar } from '../ui/avatar';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
 import { ScrollArea } from '../ui/scroll-area';
+import { Skeleton } from '../ui/skeleton';
 import { formSchema, FormSchema } from './PageConversation.schemas';
 import { PageConversationProps } from './PageConversation.types';
+import Image from 'next/image';
 
 export default function PageConversation(props: PageConversationProps) {
   const route = useRouter();
 
-  const [messages, setMessages] = useState<ChatCompletionMessageParam[]>([]);
+  const [messages, setMessages] = useState<Array<ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam>>([
+    {
+      role: 'system',
+      content: [
+        {
+          text: 'Olá 🤖 como posso te ajudar?',
+          type: 'text',
+        },
+      ],
+    },
+  ]);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -62,20 +73,28 @@ export default function PageConversation(props: PageConversationProps) {
   const onSubmit: SubmitHandler<FormSchema> = async (data) => {
     const { prompt } = data;
 
+    const userMessage: ChatCompletionUserMessageParam = {
+      role: 'user',
+      content: [
+        {
+          text: prompt,
+          type: 'text',
+        }
+      ]
+    };
+
+    setMessages((current) => [...current, userMessage]);
+
     try {
-      const userMessage: ChatCompletionMessageParam = {
-        role: 'user',
-        content: prompt,
-      };
       const newMessages = [...messages, userMessage];
 
       const response = await axios.post('/api/conversation', {
         messages: newMessages,
       });
 
-      setMessages((current) => [...current, userMessage, response.data]);
+      setMessages((current) => [...current, response.data as ChatCompletionSystemMessageParam]);
 
-      form.reset()
+      form.reset();
     } catch (error) {
       console.log(error);
       toast.error('Ocorreu um erro.');
@@ -85,7 +104,7 @@ export default function PageConversation(props: PageConversationProps) {
   };
 
   return (
-    <main className="grid flex-1 gap-4 overflow-auto p-4 md:grid-cols-2 lg:grid-cols-3">
+    <main className="grid flex-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3 h-full overflow-hidden">
       <div
         className="relative hidden flex-col items-start gap-8 md:flex"
         x-chunk="dashboard-03-chunk-0"
@@ -200,17 +219,14 @@ export default function PageConversation(props: PageConversationProps) {
           </fieldset>
         </form>
       </div>
-      <div className="relative flex h-full min-h-[50vh] flex-col rounded-xl bg-muted/50 p-4 lg:col-span-2">
-        <Badge className="absolute right-3 top-3">Output</Badge>
-        <ScrollArea className="flex-grow p-4">
-          <div className="space-y-4">
+      <div className="relative flex h-full min-h-[50vh] flex-col  rounded-xl bg-muted/50 p-4 lg:col-span-2">
+        <ScrollArea className="flex-grow p-4 max-h-full overflow-y-auto w-full">
+          <div className="space-y-4 w-full">
             {messages.map((message, index) => (
               <div
                 key={index}
                 className={`flex items-start gap-3 ${
-                  message.role === 'user'
-                    ? 'flex-row-reverse justify-end'
-                    : 'justify-start'
+                  message.role === 'user' ? 'flex-row-reverse' : 'justify-start'
                 }`}
               >
                 <Avatar
@@ -227,16 +243,45 @@ export default function PageConversation(props: PageConversationProps) {
                   )}
                 </Avatar>
                 <div
-                  className={`rounded-lg p-3 max-w-[80%] ${
+                  className={`rounded-lg p-3 text-sm max-w-[80%] ${
                     message.role === 'user'
-                      ? 'border bg-secondary text-secondary-foreground'
+                      ? 'border bg-secondary text-secondary-foreground '
                       : 'text-secondary-foreground'
                   }`}
                 >
-                  <p className="text-sm">{message.content ?? ''}</p>
+                  {Array.isArray(message.content) ? (
+                    message.content.map((part, index) => {
+                      if (part.type === 'text') {
+                        return (
+                          <p key={index} className={`${message.role === 'user' ? '' : 'font-mono'} break-all whitespace-wrap`}>
+                            {part.text}
+                          </p>
+                        );
+                      } else if (part.type === 'image_url') { // Verifica se é uma imagem
+                        return (
+                          <Image key={index} src={part.image_url.url} alt="Imagem" layout="responsive" />
+                        );
+                      }
+                      return <p>Erro desconhecido.</p>; // Retorna null se o tipo não for reconhecido
+                    })
+                  ) : (
+                    <p className={`${message.role === 'user' ? '' : 'font-mono'} break-all whitespace-break-spaces`}>
+                      {message.content}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
+
+            {isSubmitting && (
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+              </div>
+            )}
           </div>
         </ScrollArea>
         <Form {...form}>
