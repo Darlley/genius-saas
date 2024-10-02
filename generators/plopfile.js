@@ -33,7 +33,7 @@ module.exports = (plop) => {
       },
       {
         type: 'add',
-        path: '../src/components/{{pascalCase name}}/{{pascalCase name}}.schema.ts',
+        path: '../src/components/{{pascalCase name}}/{{pascalCase name}}.schemas.ts',
         templateFile: './templates/component/Schemas.ts.hbs',
       },
     ], // array of actions

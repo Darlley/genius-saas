@@ -3,8 +3,8 @@ import type { Metadata } from 'next';
 import {
   Bell,
   Bot,
-  Brain,
   Camera,
+  Code,
   Home,
   LineChart,
   Menu,
@@ -47,6 +47,18 @@ const routes = [
     color: 'stroke-blue-500',
   },
   {
+    label: 'Conversar com IA',
+    icon: Bot,
+    href: '/conversation',
+    color: 'stroke-indigo-500',
+  },
+  {
+    label: 'Gerar Código',
+    icon: Code,
+    href: '/code',
+    color: 'stroke-orange-500',
+  },
+  {
     label: 'Gerar Imagem',
     icon: Camera,
     href: '/gerar-imagem',
@@ -63,18 +75,6 @@ const routes = [
     icon: Music,
     href: '/gerar-audio',
     color: 'stroke-green-500',
-  },
-  {
-    label: 'Conversar com IA',
-    icon: Bot,
-    href: '/conversation',
-    color: 'stroke-indigo-500',
-  },
-  {
-    label: 'Conversar com RAG',
-    icon: Brain,
-    href: '/rag-conversation',
-    color: 'stroke-orange-500',
   },
 ];
 
