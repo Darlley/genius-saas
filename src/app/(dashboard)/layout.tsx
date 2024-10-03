@@ -43,7 +43,7 @@ const routes = [
   {
     label: 'Dashboard',
     icon: Home,
-    href: '/',
+    href: '/dashboard',
     color: 'stroke-blue-500',
   },
   {
@@ -61,7 +61,7 @@ const routes = [
   {
     label: 'Gerar Imagem',
     icon: Camera,
-    href: '/gerar-imagem',
+    href: '/image',
     color: 'stroke-red-500',
   },
   {
