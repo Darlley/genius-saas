@@ -29,6 +29,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
 import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
 
+import Image from 'next/image';
+import { AspectRatio } from '../ui/aspect-ratio';
+import { Card, CardContent } from '../ui/card';
 import {
   Select,
   SelectContent,
@@ -40,19 +43,25 @@ import {
   amountOptions,
   formSchema,
   FormSchema,
-  resolutionOptions,
+  resolutionOptionsDallE2,
+  resolutionOptionsDallE3,
+  modelOptions,
 } from './PageImageGeneration.schemas';
 import { PageImageGenerationProps } from './PageImageGeneration.types';
+import { Progress } from '../ui/progress';
+
 export default function PageImageGeneration(props: PageImageGenerationProps) {
   const route = useRouter();
   const [images, setImages] = useState<Array<string>>([]);
+  const [cooldownTime, setCooldownTime] = useState<number | null>(null);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       prompt: '',
       amount: '1',
-      resolution: '512x512',
+      resolution: '1024x1024',
+      model: 'dall-e-2',
     },
   });
 
@@ -60,19 +69,26 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
     form.formState;
 
   const onSubmit: SubmitHandler<FormSchema> = async (data) => {
-    return console.log(data);
     try {
-      const response = await axios.post('/api/conversation', data);
+      const response = await axios.post('/api/image', data);
       const urls = response?.data.map((image: { url: string }) => image.url);
 
       setImages(urls);
-
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      toast.error('Ocorreu um erro.');
+      toast.error('Ocorreu um erro ao gerar a imagem.');
     } finally {
-      // route.push('')
+      setCooldownTime(60); // Define o tempo de espera para 60 segundos
+      const timer = setInterval(() => {
+        setCooldownTime((prevTime) => {
+          if (prevTime === null || prevTime <= 1) {
+            clearInterval(timer);
+            return null;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
     }
   };
 
@@ -106,6 +122,25 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
           </div>
         </div>
 
+        {images.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 my-4">
+            {images.map((imageUrl, index) => (
+              <Card key={index}>
+                <CardContent className="p-2">
+                  <AspectRatio ratio={1}>
+                    <Image
+                      src={imageUrl}
+                      alt={`Imagem gerada ${index + 1}`}
+                      fill
+                      className="rounded-md object-cover"
+                    />
+                  </AspectRatio>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
         {isSubmitting && (
           <div className="flex flex-col space-y-3 my-4">
             <Skeleton className="h-[250px] w-[250px] rounded-xl" />
@@ -118,6 +153,15 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
       </ScrollArea>
 
       <div className="p-4">
+        {cooldownTime !== null && (
+          <div className="mb-4">
+            <Progress value={((60 - cooldownTime) / 60) * 100} className="w-full" />
+            <p className="text-sm text-center mt-2">
+              Aguarde {cooldownTime} segundos para fazer uma nova requisição.
+            </p>
+          </div>
+        )}
+
         <Form {...form}>
           <form
             className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
@@ -170,6 +214,42 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
               <div className="flex items-center gap-2">
                 <FormField
                   control={form.control}
+                  name="model"
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        disabled={isSubmitting}
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          if (value === 'dall-e-3') {
+                            form.setValue('amount', '1');
+                            form.setValue('resolution', '1024x1024');
+                          } else {
+                            form.setValue('resolution', '512x512');
+                          }
+                        }}
+                        value={field.value}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {modelOptions.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="resolution"
                   render={({ field }) => (
                     <FormItem>
@@ -185,7 +265,7 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {resolutionOptions.map((item) => (
+                          {(form.watch('model') === 'dall-e-2' ? resolutionOptionsDallE2 : resolutionOptionsDallE3).map((item) => (
                             <SelectItem key={item.value} value={item.value}>
                               {item.label}
                             </SelectItem>
@@ -196,33 +276,35 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Select
-                        disabled={isSubmitting}
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {amountOptions.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}
-                />
+                {form.watch('model') === 'dall-e-2' && (
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select
+                          disabled={isSubmitting}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {amountOptions.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 {!!errors.prompt && (
                   <p className="text-destructive text-xs">
@@ -234,9 +316,9 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
                   size="sm"
                   variant={!!errors.prompt ? 'destructive' : 'default'}
                   className="ml-auto gap-1.5"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || cooldownTime !== null}
                 >
-                  Send Message
+                  Enviar Mensagem
                   {isSubmitting ? (
                     <LoaderCircle className="size-3.5 animate-spin" />
                   ) : (

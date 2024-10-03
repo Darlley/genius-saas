@@ -110,7 +110,7 @@ export default function PageCodeGeneration(props: PageCodeGenerationProps) {
         </div>
       </header>
 
-      <ScrollArea className="flex flex-col w-full h-full box-content p-4">
+      <ScrollArea className="flex flex-col w-full h-full box-content p-4 gap-4">
         <div className="flex items-start gap-3 justify-start">
           <Avatar className="size-8 p-1 mt-2 border flex items-center justify-center">
             <Bot className="size-full stroke-1" />
