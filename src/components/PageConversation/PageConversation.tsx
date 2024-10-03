@@ -1,15 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Tooltip,
@@ -18,14 +9,11 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  Bird,
   Bot,
   CornerDownLeft,
   LoaderCircle,
   Mic,
   Paperclip,
-  Rabbit,
-  Turtle,
   User,
 } from 'lucide-react';
 
@@ -33,8 +21,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
 import axios from 'axios';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ChatCompletionAssistantMessageParam, ChatCompletionContentPartText, ChatCompletionMessageParam, ChatCompletionSystemMessageParam, ChatCompletionUserMessageParam } from 'openai/resources/index.mjs';
+import {
+  ChatCompletionAssistantMessageParam,
+  ChatCompletionUserMessageParam,
+} from 'openai/resources/index.mjs';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Avatar } from '../ui/avatar';
@@ -43,12 +35,13 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
 import { formSchema, FormSchema } from './PageConversation.schemas';
 import { PageConversationProps } from './PageConversation.types';
-import Image from 'next/image';
 
 export default function PageConversation(props: PageConversationProps) {
   const route = useRouter();
 
-  const [messages, setMessages] = useState<Array<ChatCompletionAssistantMessageParam | ChatCompletionUserMessageParam>>([]);
+  const [messages, setMessages] = useState<
+    Array<ChatCompletionAssistantMessageParam | ChatCompletionUserMessageParam>
+  >([]);
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -69,8 +62,8 @@ export default function PageConversation(props: PageConversationProps) {
         {
           text: prompt,
           type: 'text',
-        }
-      ]
+        },
+      ],
     };
 
     setMessages((current) => [...current, userMessage]);
@@ -82,7 +75,10 @@ export default function PageConversation(props: PageConversationProps) {
         messages: newMessages,
       });
 
-      setMessages((current) => [...current, response.data as ChatCompletionAssistantMessageParam]);
+      setMessages((current) => [
+        ...current,
+        response.data as ChatCompletionAssistantMessageParam,
+      ]);
 
       form.reset();
     } catch (error) {
@@ -94,15 +90,24 @@ export default function PageConversation(props: PageConversationProps) {
   };
 
   return (
-    <main className="flex-1 gap-4 p-4 h-full overflow-hidden flex flex-col">
-      <div className="size-max flex items-center gap-2">
-        <div className="rounded-lg bg-indigo-100 p-1 flex items-center justify-center border border-indigo-500">
+    <main className="flex-1 h-full overflow-hidden flex flex-col">
+      <header className="flex gap-4 items-center p-4 border-b">
+        <div className="size-max rounded-lg bg-indigo-100 p-2 flex items-center justify-center border border-indigo-500">
           <Bot className="size-6 stroke-indigo-500 stroke-1" />
         </div>
-        <div>Conversa</div>
-      </div>
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            Conversa
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Explore novas ideias, discuta conceitos, ou simplesmente compartilhe
+            seus pensamentos. Estamos aqui para ouvir e ajudar de qualquer
+            maneira que possamos.
+          </p>
+        </div>
+      </header>
 
-      <ScrollArea className="h-full">
+      <ScrollArea className="flex flex-col w-full h-full box-content p-4">
         <div className="flex items-start gap-3 justify-start">
           <Avatar className="size-8 p-1 mt-2 border flex items-center justify-center">
             <Bot className="size-full stroke-1" />
@@ -190,7 +195,8 @@ export default function PageConversation(props: PageConversationProps) {
           </div>
         )}
       </ScrollArea>
-      <div>
+
+      <div className="p-4">
         <Form {...form}>
           <form
             className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"

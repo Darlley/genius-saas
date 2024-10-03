@@ -93,199 +93,208 @@ export default function PageCodeGeneration(props: PageCodeGenerationProps) {
   };
 
   return (
-    <main className="flex-1 gap-4 p-4 h-full overflow-hidden flex flex-col">
-      <div className="size-max flex items-center gap-2">
-        <div className="rounded-lg bg-orange-100 p-1 flex items-center justify-center border border-orange-500">
+    <main className="flex-1 h-full overflow-hidden flex flex-col">
+      <header className="flex gap-4 items-center p-4 border-b">
+        <div className="size-max rounded-lg bg-orange-100 p-2 flex items-center justify-center border border-orange-500">
           <Code className="size-6 stroke-orange-500 stroke-1" />
         </div>
-        <div>Gerar de Código</div>
-      </div>
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            Geração de Código
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Use esta ferramenta para gerar código com base em suas instruções.
+            Nosso assistente AI está pronto para ajudar com suas necessidades de
+            programação.
+          </p>
+        </div>
+      </header>
 
-        <ScrollArea className="flex flex-col w-full h-full box-content pr-4">
-          <div className="flex items-start gap-3 justify-start">
-            <Avatar className="size-8 p-1 mt-2 border flex items-center justify-center">
-              <Bot className="size-full stroke-1" />
-            </Avatar>
-            <div className="rounded-lg p-3 text-sm max-w-[80%] text-secondary-foreground">
-              <p className="font-mono break-all whitespace-break-spaces">
-                Olá 🤖 como posso te ajudar?
-              </p>
-            </div>
+      <ScrollArea className="flex flex-col w-full h-full box-content p-4">
+        <div className="flex items-start gap-3 justify-start">
+          <Avatar className="size-8 p-1 mt-2 border flex items-center justify-center">
+            <Bot className="size-full stroke-1" />
+          </Avatar>
+          <div className="rounded-lg p-3 text-sm max-w-[80%] text-secondary-foreground">
+            <p className="font-mono break-all whitespace-break-spaces">
+              Olá 🤖 como posso te ajudar?
+            </p>
           </div>
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex items-start gap-3 ${
-                message.role === 'user' ? 'flex-row-reverse' : 'justify-start'
+        </div>
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex items-start gap-3 ${
+              message.role === 'user' ? 'flex-row-reverse' : 'justify-start'
+            }`}
+          >
+            <Avatar
+              className={`size-8 p-1 mt-2 ${
+                message.role === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border flex items-center justify-center'
               }`}
             >
-              <Avatar
-                className={`size-8 p-1 mt-2 ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border flex items-center justify-center'
-                }`}
-              >
-                {message.role === 'user' ? (
-                  <User className="size-full stroke-1" />
-                ) : (
-                  <Bot className="size-full stroke-1" />
-                )}
-              </Avatar>
-              <div
-                className={`rounded-lg p-3 text-sm max-w-[80%] ${
-                  message.role === 'user'
-                    ? 'border bg-secondary text-secondary-foreground '
-                    : 'text-secondary-foreground'
-                }`}
-              >
-                {Array.isArray(message.content) ? (
-                  message.content.map((part, index) => {
-                    if (part.type === 'text') {
-                      return (
-                        <ReactMarkdown
-                          rehypePlugins={[rehypeRaw]}
-                          components={{
-                            p: ({ node, ...props }) => (
-                              <p className="" {...props} />
-                            ),
-                            code: ({ node, className, children, ...props }) => {
-                              const match = /language-(\w+)/.exec(
-                                className || ''
-                              );
-                              return match ? (
-                                <pre className="bg-gray-800 text-white p-4 rounded-md overflow-x-auto">
-                                  <code
-                                    className={`language-${match[1]}`}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </code>
-                                </pre>
-                              ) : (
+              {message.role === 'user' ? (
+                <User className="size-full stroke-1" />
+              ) : (
+                <Bot className="size-full stroke-1" />
+              )}
+            </Avatar>
+            <div
+              className={`rounded-lg p-3 text-sm max-w-[80%] ${
+                message.role === 'user'
+                  ? 'border bg-secondary text-secondary-foreground '
+                  : 'text-secondary-foreground'
+              }`}
+            >
+              {Array.isArray(message.content) ? (
+                message.content.map((part, index) => {
+                  if (part.type === 'text') {
+                    return (
+                      <ReactMarkdown
+                        rehypePlugins={[rehypeRaw]}
+                        components={{
+                          p: ({ node, ...props }) => (
+                            <p className="" {...props} />
+                          ),
+                          code: ({ node, className, children, ...props }) => {
+                            const match = /language-(\w+)/.exec(
+                              className || ''
+                            );
+                            return match ? (
+                              <pre className="bg-gray-800 text-white p-4 rounded-md overflow-x-auto">
                                 <code
-                                  className="bg-gray-200 text-gray-800 px-1 rounded"
+                                  className={`language-${match[1]}`}
                                   {...props}
                                 >
                                   {children}
                                 </code>
-                              );
-                            },
-                            ul: ({ node, ...props }) => (
-                              <ul
-                                className="list-disc list-inside text-wrap"
+                              </pre>
+                            ) : (
+                              <code
+                                className="bg-gray-200 text-gray-800 px-1 rounded"
                                 {...props}
-                              />
-                            ),
-                            ol: ({ node, ...props }) => (
-                              <ol
-                                className="list-decimal list-inside text-wrap"
-                                {...props}
-                              />
-                            ),
-                            li: ({ node, ...props }) => (
-                              <li className="" {...props} />
-                            ),
-                            a: ({ node, ...props }) => (
-                              <a
-                                className="text-blue-600 hover:underline"
-                                {...props}
-                              />
-                            ),
-                            blockquote: ({ node, ...props }) => (
-                              <blockquote
-                                className="border-l-4 border-gray-300 pl-4 italic my-2"
-                                {...props}
-                              />
-                            ),
-                          }}
-                          className={`${
-                            message.role === 'user' ? '' : 'font-mono'
-                          } break-all whitespace-pre-wrap flex flex-col max-w-full`}
-                        >
-                          {part.text}
-                        </ReactMarkdown>
-                      );
-                    } else if (part.type === 'image_url') {
-                      // Verifica se é uma imagem
-                      return (
-                        <Image
-                          key={index}
-                          src={part.image_url.url}
-                          alt="Imagem"
-                          layout="responsive"
-                        />
-                      );
-                    }
-                    return <p>Erro desconhecido.</p>; // Retorna null se o tipo não for reconhecido
-                  })
-                ) : (
-                  <ReactMarkdown
-                    rehypePlugins={[rehypeRaw]}
-                    components={{
-                      p: ({ node, ...props }) => <p className="" {...props} />,
-                      code: ({ node, className, children, ...props }) => {
-                        const match = /language-(\w+)/.exec(className || '');
-                        return match ? (
-                          <pre className="bg-gray-800 text-white p-4 rounded-md overflow-x-auto">
-                            <code className={`language-${match[1]}`} {...props}>
-                              {children}
-                            </code>
-                          </pre>
-                        ) : (
-                          <code
-                            className="bg-gray-200 text-gray-800 px-1 rounded"
-                            {...props}
-                          >
+                              >
+                                {children}
+                              </code>
+                            );
+                          },
+                          ul: ({ node, ...props }) => (
+                            <ul
+                              className="list-disc list-inside text-wrap"
+                              {...props}
+                            />
+                          ),
+                          ol: ({ node, ...props }) => (
+                            <ol
+                              className="list-decimal list-inside text-wrap"
+                              {...props}
+                            />
+                          ),
+                          li: ({ node, ...props }) => (
+                            <li className="" {...props} />
+                          ),
+                          a: ({ node, ...props }) => (
+                            <a
+                              className="text-blue-600 hover:underline"
+                              {...props}
+                            />
+                          ),
+                          blockquote: ({ node, ...props }) => (
+                            <blockquote
+                              className="border-l-4 border-gray-300 pl-4 italic my-2"
+                              {...props}
+                            />
+                          ),
+                        }}
+                        className={`${
+                          message.role === 'user' ? '' : 'font-mono'
+                        } break-all whitespace-pre-wrap flex flex-col max-w-full`}
+                      >
+                        {part.text}
+                      </ReactMarkdown>
+                    );
+                  } else if (part.type === 'image_url') {
+                    // Verifica se é uma imagem
+                    return (
+                      <Image
+                        key={index}
+                        src={part.image_url.url}
+                        alt="Imagem"
+                        layout="responsive"
+                      />
+                    );
+                  }
+                  return <p>Erro desconhecido.</p>; // Retorna null se o tipo não for reconhecido
+                })
+              ) : (
+                <ReactMarkdown
+                  rehypePlugins={[rehypeRaw]}
+                  components={{
+                    p: ({ node, ...props }) => <p className="" {...props} />,
+                    code: ({ node, className, children, ...props }) => {
+                      const match = /language-(\w+)/.exec(className || '');
+                      return match ? (
+                        <pre className="bg-gray-800 text-white p-4 rounded-md overflow-x-auto">
+                          <code className={`language-${match[1]}`} {...props}>
                             {children}
                           </code>
-                        );
-                      },
-                      ul: ({ node, ...props }) => (
-                        <ul
-                          className="list-disc list-inside text-wrap"
+                        </pre>
+                      ) : (
+                        <code
+                          className="bg-gray-200 text-gray-800 px-1 rounded"
                           {...props}
-                        />
-                      ),
-                      ol: ({ node, ...props }) => (
-                        <ol
-                          className="list-decimal list-inside text-wrap"
-                          {...props}
-                        />
-                      ),
-                      li: ({ node, ...props }) => <li className="" {...props} />,
-                      a: ({ node, ...props }) => (
-                        <a className="text-blue-600 hover:underline" {...props} />
-                      ),
-                      blockquote: ({ node, ...props }) => (
-                        <blockquote
-                          className="border-l-4 border-gray-300 pl-4 italic my-2"
-                          {...props}
-                        />
-                      ),
-                    }}
-                    className={`${
-                      message.role === 'user' ? '' : 'font-mono'
-                    } break-all whitespace-pre-wrap flex flex-col max-w-full`}
-                  >
-                    {message.content}
-                  </ReactMarkdown>
-                )}
-              </div>
+                        >
+                          {children}
+                        </code>
+                      );
+                    },
+                    ul: ({ node, ...props }) => (
+                      <ul
+                        className="list-disc list-inside text-wrap"
+                        {...props}
+                      />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol
+                        className="list-decimal list-inside text-wrap"
+                        {...props}
+                      />
+                    ),
+                    li: ({ node, ...props }) => <li className="" {...props} />,
+                    a: ({ node, ...props }) => (
+                      <a className="text-blue-600 hover:underline" {...props} />
+                    ),
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote
+                        className="border-l-4 border-gray-300 pl-4 italic my-2"
+                        {...props}
+                      />
+                    ),
+                  }}
+                  className={`${
+                    message.role === 'user' ? '' : 'font-mono'
+                  } break-all whitespace-pre-wrap flex flex-col max-w-full`}
+                >
+                  {message.content}
+                </ReactMarkdown>
+              )}
             </div>
-          ))}
-          {isSubmitting && (
-            <div className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
+          </div>
+        ))}
+        {isSubmitting && (
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
             </div>
-          )}
-        </ScrollArea>
+          </div>
+        )}
+      </ScrollArea>
 
-      <div>
+      <div className='p-4'>
         <Form {...form}>
           <form
             className="relative overflow-hidden rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring"
