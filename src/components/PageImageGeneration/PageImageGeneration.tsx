@@ -30,8 +30,10 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { AspectRatio } from '../ui/aspect-ratio';
-import { Card, CardContent } from '../ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '../ui/card';
+import { Progress } from '../ui/progress';
 import {
   Select,
   SelectContent,
@@ -43,12 +45,11 @@ import {
   amountOptions,
   formSchema,
   FormSchema,
+  modelOptions,
   resolutionOptionsDallE2,
   resolutionOptionsDallE3,
-  modelOptions,
 } from './PageImageGeneration.schemas';
 import { PageImageGenerationProps } from './PageImageGeneration.types';
-import { Progress } from '../ui/progress';
 
 export default function PageImageGeneration(props: PageImageGenerationProps) {
   const route = useRouter();
@@ -123,19 +124,24 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
         </div>
 
         {images.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 my-4">
+          <div className="max-w-[900px] flex flex-wrap gap-4 p-4">
             {images.map((imageUrl, index) => (
-              <Card key={index}>
-                <CardContent className="p-2">
-                  <AspectRatio ratio={1}>
-                    <Image
-                      src={imageUrl}
-                      alt={`Imagem gerada ${index + 1}`}
-                      fill
-                      className="rounded-md object-cover"
-                    />
-                  </AspectRatio>
-                </CardContent>
+              <Card key={index} className="w-full sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] overflow-hidden">
+                <AspectRatio ratio={16 / 9}>
+                  <Image
+                    alt={`Imagem gerada ${index + 1}`}
+                    className="object-cover"
+                    src={imageUrl}
+                    fill
+                  />
+                </AspectRatio>
+                <CardFooter className='p-0'>
+                  <Button asChild size="sm" className='w-full rounded-t-none'>
+                    <Link href={imageUrl} target="_blank" rel="noopener noreferrer">
+                      Download
+                    </Link>
+                  </Button>
+                </CardFooter>
               </Card>
             ))}
           </div>
@@ -155,7 +161,10 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
       <div className="p-4">
         {cooldownTime !== null && (
           <div className="mb-4">
-            <Progress value={((60 - cooldownTime) / 60) * 100} className="w-full" />
+            <Progress
+              value={((60 - cooldownTime) / 60) * 100}
+              className="w-full"
+            />
             <p className="text-sm text-center mt-2">
               Aguarde {cooldownTime} segundos para fazer uma nova requisição.
             </p>
@@ -265,7 +274,10 @@ export default function PageImageGeneration(props: PageImageGenerationProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {(form.watch('model') === 'dall-e-2' ? resolutionOptionsDallE2 : resolutionOptionsDallE3).map((item) => (
+                          {(form.watch('model') === 'dall-e-2'
+                            ? resolutionOptionsDallE2
+                            : resolutionOptionsDallE3
+                          ).map((item) => (
                             <SelectItem key={item.value} value={item.value}>
                               {item.label}
                             </SelectItem>

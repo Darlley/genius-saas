@@ -10,12 +10,7 @@ export const amountOptions = [
   { value: '2', label: '2 Fotos' },
   { value: '3', label: '3 Fotos' },
   { value: '4', label: '4 Fotos' },
-  { value: '5', label: '5 Fotos' },
-  { value: '6', label: '6 Fotos' },
-  { value: '7', label: '7 Fotos' },
-  { value: '8', label: '8 Fotos' },
-  { value: '9', label: '9 Fotos' },
-  { value: '10', label: '10 Fotos' },
+  { value: '5', label: '5 Fotos' }
 ] as const;
 
 export const resolutionOptionsDallE2 = [
@@ -38,7 +33,7 @@ export const formSchema = z.object({
     .min(1, {
       message: 'A mensagem é obrigatória',
     }),
-  amount: z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']),
+  amount: z.enum(['1', '2', '3', '4', '5']),
   resolution: z.enum(['256x256', '512x512', '1024x1024', '1792x1024', '1024x1792']),
   model: z.enum(['dall-e-2', 'dall-e-3'])
 });
